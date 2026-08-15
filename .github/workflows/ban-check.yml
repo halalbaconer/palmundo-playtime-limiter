@@ -1,12 +1,10 @@
 name: Palworld Playtime Ban Check
 
 on:
-  # Déclenché par cron-job.org (appel à l'API workflow_dispatch toutes les 5 min).
-  # Peut aussi être lancé manuellement depuis l'onglet Actions.
   workflow_dispatch: {}
 
 permissions:
-  contents: write
+  contents: write  # nécessaire pour que le workflow puisse commit playtime_state.json
 
 jobs:
   check:
@@ -29,6 +27,7 @@ jobs:
           PAL_SERVER_PORT: ${{ secrets.PAL_SERVER_PORT }}
           PAL_ADMIN_PASSWORD: ${{ secrets.PAL_ADMIN_PASSWORD }}
           PAL_DAILY_LIMIT_HOURS: ${{ secrets.PAL_DAILY_LIMIT_HOURS }}
+          PAL_EXCEPTION_STEAM_IDS: ${{ secrets.PAL_EXCEPTION_STEAM_IDS }}
         run: python palworld_playtime_ban_gha.py
 
       - name: Commit updated state
