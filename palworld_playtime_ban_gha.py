@@ -65,7 +65,7 @@ def ban_player(steam_id: str, name: str = "") -> None:
     try:
         userid = steam_id if steam_id.startswith("steam_") else f"steam_{steam_id}"
         r = requests.post(
-            f"{BASE_URL}/kick",
+            f"{BASE_URL}/ban",
             auth=AUTH,
             json={"userid": userid, "message": BAN_MESSAGE},
             timeout=10,
