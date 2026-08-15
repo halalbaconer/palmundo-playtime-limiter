@@ -19,11 +19,16 @@ SERVER_PORT = int(os.environ.get("PAL_SERVER_PORT", "8212"))
 ADMIN_PASSWORD = os.environ["PAL_ADMIN_PASSWORD"]
 DAILY_LIMIT_HOURS = float(os.environ.get("PAL_DAILY_LIMIT_HOURS", "4"))
 
+# SteamID exemptés du quota, séparés par des virgules (ex: "76561199095359524,76561198194089751")
+EXCEPTION_STEAM_IDS = {
+    s.strip() for s in os.environ.get("PAL_EXCEPTION_STEAM_IDS", "").split(",") if s.strip()
+}
+
 STATE_FILE = Path(__file__).with_name("playtime_state.json")
 
 BAN_MESSAGE = f"Quota journalier de {DAILY_LIMIT_HOURS}h atteint. Reviens demain !"
 
-MAX_DELTA_SECONDS = 15 * 60  # 15 minutes
+MAX_DELTA_SECONDS = 15 * 60
 
 # ======================================================================
 
@@ -112,8 +117,7 @@ def main() -> None:
         delta = (now - datetime.fromisoformat(last_check)).total_seconds()
         delta = max(0, min(delta, MAX_DELTA_SECONDS))
     else:
-        delta = 0  # premier run, pas de delta à ajouter
-
+        delta = 0 
     players = get_online_players()
     limit_seconds = DAILY_LIMIT_HOURS * 3600
 
@@ -121,6 +125,10 @@ def main() -> None:
         steam_id = str(p.get("steamId") or p.get("userId", "")).replace("steam_", "")
         name = p.get("name", "?")
         if not steam_id or steam_id in state["banned_today"]:
+            continue
+
+        if steam_id in EXCEPTION_STEAM_IDS:
+            log.info("%s (%s) : exempté du quota, ignoré", name, steam_id)
             continue
 
         current = state["playtime_seconds"].get(steam_id, 0) + delta
