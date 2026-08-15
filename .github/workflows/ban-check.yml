@@ -1,0 +1,40 @@
+name: Palworld Playtime Ban Check
+
+on:
+  # Déclenché par cron-job.org (appel à l'API workflow_dispatch toutes les 5 min).
+  # Peut aussi être lancé manuellement depuis l'onglet Actions.
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Run playtime check
+        env:
+          PAL_SERVER_HOST: ${{ secrets.PAL_SERVER_HOST }}
+          PAL_SERVER_PORT: ${{ secrets.PAL_SERVER_PORT }}
+          PAL_ADMIN_PASSWORD: ${{ secrets.PAL_ADMIN_PASSWORD }}
+          PAL_DAILY_LIMIT_HOURS: ${{ secrets.PAL_DAILY_LIMIT_HOURS }}
+        run: python palworld_playtime_ban_gha.py
+
+      - name: Commit updated state
+        run: |
+          git config user.name "playtime-bot"
+          git config user.email "playtime-bot@users.noreply.github.com"
+          git add playtime_state.json
+          git diff --quiet --cached || git commit -m "update playtime state [skip ci]"
+          git push
