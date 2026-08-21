@@ -1,6 +1,8 @@
 {
   "date": "2026-08-21",
-  "playtime_seconds": {},
+  "playtime_seconds": {
+    "76561199095359524": 56.701065
+  },
   "banned_today": [],
-  "last_check_utc": "2026-08-21T00:05:16.851564+00:00"
+  "last_check_utc": "2026-08-21T00:06:13.552629+00:00"
 }
